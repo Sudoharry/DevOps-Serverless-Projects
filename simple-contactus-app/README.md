@@ -1,4 +1,6 @@
 # AWS Serverless Architecture: Step-by-Step Guide
+![main](https://github.com/user-attachments/assets/e1fbc6e1-41fd-49fa-89d9-cbb4b580280a)
+
 
 This guide outlines how to build a serverless web application using AWS services:
 
@@ -27,10 +29,12 @@ This guide outlines how to build a serverless web application using AWS services
 
 1. Go to the AWS Management Console.
 2. Navigate to **DynamoDB > Tables > Create Table**.
-3. Specify the table name (e.g., `ContactRequests`).
-4. Set the **Primary Key** as `RequestId` (String).
+3. Specify the table name (e.g., `harrytables`).
+4. Set the **Primary Key** as `email` (String).
 5. Configure additional attributes as needed (e.g., `CustomerName`, `CustomerEmail`, `Message`).
 6. Choose the default settings and click **Create Table**.
+---
+![Create-table](https://github.com/user-attachments/assets/22226216-73d2-4c0f-aa1e-1991812c7521)
 
 ---
 
@@ -43,38 +47,68 @@ This guide outlines how to build a serverless web application using AWS services
 3. Under **Permissions**, attach the IAM role created earlier.
 4. Add the following code:
 
-### Example Code (Node.js):
-```javascript
-const AWS = require('aws-sdk');
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+### Example Code (Python3):
+```python3
+import json
+import os
+import boto3
 
-exports.handler = async (event) => {
-    const data = JSON.parse(event.body);
-
-    const params = {
-        TableName: 'ContactRequests',
-        Item: {
-            RequestId: data.RequestId,
-            CustomerName: data.CustomerName,
-            CustomerEmail: data.CustomerEmail,
-            Message: data.Message,
-        },
-    };
-
-    try {
-        await dynamoDb.put(params).promise();
+def lambda_handler(event, context):
+    try:
+        mypage = page_router(event['httpMethod'], event['queryStringParameters'], event['body'])
+        return mypage
+    except Exception as e:
         return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Request processed successfully!' }),
-        };
-    } catch (error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Error processing request', error }),
-        };
-    }
-};
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
+
+def page_router(httpmethod, querystring, formbody):
+    if httpmethod == 'GET':
+        try:
+            with open('contactus.html', 'r') as htmlFile:
+                htmlContent = htmlFile.read()
+            return {
+                'statusCode': 200,
+                'headers': {"Content-Type": "text/html"},
+                'body': htmlContent
+            }
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'error': str(e)})
+            }
+
+    elif httpmethod == 'POST':
+        try:
+            insert_record(formbody)
+            with open('success.html', 'r') as htmlFile:
+                htmlContent = htmlFile.read()
+            return {
+                'statusCode': 200,
+                'headers': {"Content-Type": "text/html"},
+                'body': htmlContent
+            }
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'error': str(e)})
+            }
+
+def insert_record(formbody):
+    formbody = formbody.replace("=", "' : '")
+    formbody = formbody.replace("&", "', '")
+    formbody = "INSERT INTO avinashtable value {'" + formbody + "'}"
+
+    client = boto3.client('dynamodb')
+    response = client.execute_statement(Statement=formbody)
+    # Assuming the execute_statement call returns successfully
+    return response
 ```
+---
+![Lambda-functions](https://github.com/user-attachments/assets/272a3377-0519-4ea8-bb3b-d1fcbdadaf49)
+
+---
 
 5. Deploy the Lambda function.
 
@@ -86,18 +120,25 @@ exports.handler = async (event) => {
 2. Choose **HTTP API**.
 3. Define the API name (e.g., `ContactUsAPI`) and click **Create**.
 4. Add a resource:
-   - Resource Path: `/contact`
+   - Resource Path: `/`
    - HTTP Method: `POST`
+   - HTTP Method: `GET`
 5. Configure integration:
    - Integration Type: **Lambda Function**
    - Lambda Function: Select `ProcessContactRequest`.
 6. Deploy the API and note the endpoint URL.
+---
+![Created-POST-METHOD](https://github.com/user-attachments/assets/62580c7d-53c0-468d-ab61-eb1a8222969e)
+
+---
+---
+![Create-GET-METHOD-LAMBDA](https://github.com/user-attachments/assets/d3112ade-0a61-41b8-a5d3-f10bd94a457e)
 
 ---
 
 ## Step 4: Test the Application
 
-1. Use **Postman** or `curl` to send a `POST` request to the API Gateway endpoint.
+1. Use **Postman** Invoke URL from API, or `curl` to send a `POST` request to the API Gateway endpoint.
    - URL: `https://<your-api-endpoint>/contact`
    - Headers: `Content-Type: application/json`
    - Body:
@@ -109,8 +150,21 @@ exports.handler = async (event) => {
        "Message": "I am interested in your services."
      }
      ```
+     ---
+     ![Invoke-URL](https://github.com/user-attachments/assets/08dbdbf5-6560-471a-945d-0627d03e79f3)
+
+     ---
+     ![Contact-us-filling-form](https://github.com/user-attachments/assets/5002cab9-1d92-4af8-b77c-3615f66ed361)
+
+     ---
+     ---
+     ![Successfull-submission-of-data](https://github.com/user-attachments/assets/d918e795-fb42-4c51-8f96-40ed191ff775)
+
+     ---
 
 2. Check the DynamoDB table to verify that the data was inserted.
+---
+![Tables-are-savedin-DynamoDB](https://github.com/user-attachments/assets/a03b775a-6750-4e94-a222-6183f0c2dcd0)
 
 ---
 
