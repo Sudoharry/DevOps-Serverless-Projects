@@ -36,6 +36,10 @@ This guide outlines how to build a serverless web application using AWS services
 ---
 ![Create-table](https://github.com/user-attachments/assets/22226216-73d2-4c0f-aa1e-1991812c7521)
 
+### Create a role for Lambda function:
+---
+![role-with-permission](https://github.com/user-attachments/assets/c9561948-720d-487f-b2d1-e7892692b75b)
+
 ---
 
 ## Step 2: Create an AWS Lambda Function
