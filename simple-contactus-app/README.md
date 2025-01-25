@@ -192,4 +192,4 @@ def insert_record(formbody):
 
 ## Conclusion
 
-You have successfully created a serverless architecture using AWS services. This setup can be scaled and extended based on your application needs. For further customization, explore additional AWS services such as SNS for notifications or S3 for file storage.
+We have successfully created a serverless architecture using AWS services. This setup can be scaled and extended based on your application needs. For further customization, explore additional AWS services such as SNS for notifications or S3 for file storage.
