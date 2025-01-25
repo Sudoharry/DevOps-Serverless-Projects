@@ -29,7 +29,7 @@ This guide outlines how to build a serverless web application using AWS services
 
 1. Go to the AWS Management Console.
 2. Navigate to **DynamoDB > Tables > Create Table**.
-3. Specify the table name (e.g., `harrytables`).
+3. Specify the table name (e.g., `harrytable`).
 4. Set the **Primary Key** as `email` (String).
 5. Configure additional attributes as needed (e.g., `CustomerName`, `CustomerEmail`, `Message`).
 6. Choose the default settings and click **Create Table**.
@@ -102,7 +102,7 @@ def page_router(httpmethod, querystring, formbody):
 def insert_record(formbody):
     formbody = formbody.replace("=", "' : '")
     formbody = formbody.replace("&", "', '")
-    formbody = "INSERT INTO avinashtable value {'" + formbody + "'}"
+    formbody = "INSERT INTO harrytable value {'" + formbody + "'}"
 
     client = boto3.client('dynamodb')
     response = client.execute_statement(Statement=formbody)
